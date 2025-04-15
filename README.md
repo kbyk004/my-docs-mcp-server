@@ -13,6 +13,7 @@
 - **TypeScript**: サーバー本体の実装言語。
 - **@modelcontextprotocol/sdk**: MCPサーバーのプロトコル実装・通信に利用。
 - **MiniSearch**: Markdownファイルの全文検索インデックス作成・検索に利用。軽量で高速な全文検索ライブラリ。
+- **wakachigaki**: 日本語テキストを分かち書き（トークナイズ）する軽量ライブラリ。MiniSearchのトークナイザとして利用し、日本語検索の精度を大幅に向上。
 - **fast-glob**: docsディレクトリ配下のMarkdownファイルを再帰的に探索。
 - **Node.js標準のfs/promises, path**: ファイル読み込みやパス操作。
 - **Stdioサーバー**: MCPクライアント（Claude DesktopやInspector等）と標準入出力経由で通信。
@@ -95,9 +96,10 @@ npx -y @modelcontextprotocol/inspector node build/index.js ./docs
 ## 提供ツール・リソース
 
 ### Tool: search_docs
-- 概要: Markdownファイルを全文検索
+- 概要: Markdownファイルを全文検索（日本語は分かち書きトークナイズで高精度検索）
 - 入力: `query`（検索ワード, 必須）、`limit`（最大件数, 省略可, デフォルト5）
 - 出力: 検索結果（ファイル名、パス、スニペット）
+- 備考: 検索クエリ・本文ともに[wakachigaki](https://github.com/yuhsak/wakachigaki)で分かち書きし、自然な日本語検索が可能です。
 
 ### Resource: read_doc
 - 概要: ファイル全文取得

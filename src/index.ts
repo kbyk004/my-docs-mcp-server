@@ -5,6 +5,7 @@ import MiniSearch from "minisearch";
 import fg from "fast-glob";
 import fs from "fs/promises";
 import path from "path";
+import { tokenize } from "wakachigaki";
 
 // インデックス用型
 interface DocRecord {
@@ -45,6 +46,7 @@ async function createIndex(): Promise<MiniSearch<DocRecord>> {
       prefix: true,
       fuzzy: 0.2,
     },
+    tokenize: (str) => tokenize(str),
   });
   miniSearch.addAll(docs);
   console.error(`[LOG] Index created with ${docs.length} documents.`);
@@ -103,8 +105,9 @@ async function main() {
         console.error(`[ERROR] queryは必須です`);
         throw new Error("queryは必須です");
       }
-      const results = miniSearch.search(query, { prefix: true, fuzzy: 0.2 }).slice(0, limit);
-      console.error(`[LOG] search_docs: query='${query}', limit=${limit}, results=${results.length}`);
+      const tokenizedQuery = tokenize(query).join(" ");
+      const results = miniSearch.search(tokenizedQuery, { prefix: true, fuzzy: 0.2 }).slice(0, limit);
+      console.error(`[LOG] search_docs: query='${query}', tokenized='${tokenizedQuery}', limit=${limit}, results=${results.length}`);
       return {
         content: [
           {
