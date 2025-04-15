@@ -51,6 +51,12 @@ async function createIndex(): Promise<MiniSearch<DocRecord>> {
   return miniSearch;
 }
 
+// search_docsツールの引数型
+interface SearchDocsArgs {
+  query: string;
+  limit?: number;
+}
+
 async function main() {
   const miniSearch = await createIndex();
   const server = new Server({
@@ -87,13 +93,12 @@ async function main() {
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     console.error(`[LOG] CallToolRequest: ${JSON.stringify(req.params)}`);
     if (req.params.name === "search_docs") {
-      const args = req.params.arguments;
+      const args = req.params.arguments as unknown as SearchDocsArgs;
       if (!args || typeof args !== "object") {
         console.error(`[ERROR] argumentsが指定されていません`);
         throw new Error("argumentsが指定されていません");
       }
-      const query = (args as any).query;
-      const limit = (args as any).limit ?? 5;
+      const { query, limit = 5 } = args;
       if (typeof query !== "string") {
         console.error(`[ERROR] queryは必須です`);
         throw new Error("queryは必須です");
@@ -111,8 +116,8 @@ async function main() {
         ]
       };
     }
-    console.error(`[ERROR] Unknown tool: ${req.params.name}`);
-    throw new Error("Unknown tool");
+    console.error(`[ERROR] 未知のツールが指定されました: ${req.params.name}`);
+    throw new Error("未知のツールが指定されました");
   });
 
   // Resource: read_doc
@@ -134,8 +139,8 @@ async function main() {
     console.error(`[LOG] ReadResourceRequest: ${JSON.stringify(req.params)}`);
     const uri = req.params.uri;
     if (!uri.startsWith("file://")) {
-      console.error(`[ERROR] Invalid URI: ${uri}`);
-      throw new Error("Invalid URI");
+      console.error(`[ERROR] 無効なURIです: ${uri}`);
+      throw new Error("無効なURIです");
     }
     const filePath = uri.replace("file://", "");
     const content = await fs.readFile(filePath, "utf-8");
